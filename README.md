@@ -4,29 +4,30 @@ MiniFRC-Tags is a small library that simplifies setup of AprilTags for MiniFRC. 
 1/4 and 1/2 scale 36h11 tags are included in a printable PDF with IDs 1 through 16, the same standard that FRC uses.
 
 ## Dependencies
-```pip3 install opencv-python```
+```opencv-python```
 
-```pip3 install pyapriltags```
+```pyapriltags```
 
-```pip3 install numpy```
+```picamera2``` - Required only when using Raspberry Pi cameras
+
+I have gotten away with using pip3 to install these on Linux, however on Raspberry Pi it is recommended to use `apt install python-<library>`
 
 ## Usage
 
 - Plug in a video capture device
-- Remove/Modify the example code at the end of `main.py`, or simply run it!
-- The code will initially run a one-time camera calibration that requires you to print a special pattern. See the detailed explanation inside `calibrate.py`
-- On subsequent runs, the example will search for FRC-style AprilTags and print their local coordinates relative to the camera
-- Read through the code comments for detailed documentation on parameters
-
-Once you have a camera.npy file generated, the intended usage is something like this:
+- Read and modify the `__init__` code in `main.py` as desired to change parameters such as image resolution, processing threads, etc.
+- On the first run, the code will only calibrate your camera. Read `calibrate.py` for details on how this works.
+- See example below to start your own solution, or run `example.py`
 
 ```python
 minifrc_tags = MiniTags()
-minifrc_tags.calibrate()
+# On first run this generates camera.npy
+# On subsequent runs it reads from camra.npy
+minifrc_tags.calibrate()  
 
 ...
 
-while robot_loop:
+while True:
   tags = minifrc_tags.get_tags()
   for tag in tags:
     print(tag.tag_id)

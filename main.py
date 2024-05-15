@@ -1,6 +1,7 @@
 import cv2
 import pyapriltags as apt
 import calibrate
+import camera
 
 
 class MiniTags:
@@ -47,9 +48,8 @@ class MiniTags:
         self.tag_standard = "tag36h11"
 
         # set up video capture with desired resolution
-        self.camera = cv2.VideoCapture(0)
-        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_resolution[0])
-        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_resolution[1])
+        # Use OPENCV for USB cameras and PICAMERA for the raspberry pi camera (attached via ribbon cable)
+        self.camera = camera.Camera(self.camera_resolution, camera.OPENCV)
 
         # See https://github.com/WillB97/pyapriltags
         # And https://github.com/WillB97/pyapriltags/blob/master/test/test.py
@@ -106,27 +106,3 @@ class MiniTags:
             detections = []
             print("No camera matrix! Set manually or call calibrate() before detecting tags!")
         return detections
-
-
-# Example usage
-minitags = MiniTags()
-minitags.calibrate()  # Loads/Creates camera parameters to correct for lens distortion
-while True:
-    # retrieve a list of tags currently in view
-    tags = minitags.get_tags()
-
-    if len(tags) > 0:
-        # We will print some data from the first tag we see
-        t = tags[0]
-        # convert translation to millimeters
-        p = (t.pose_t).round(4) * 1000
-        # print the current translation relative to the camera...
-        # note that these are in a coordinate system relative to the camera, so
-        # rotating the camera will still change the translation of the tag
-        print("\rTag %s detected! X: %s Y: %s Z: %s" % (t.tag_id, p[0], p[1], p[2]), end="")
-
-
-
-
-
-
