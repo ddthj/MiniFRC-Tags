@@ -55,7 +55,7 @@ class MiniTags:
         # And https://github.com/WillB97/pyapriltags/blob/master/test/test.py
         # This single line can greatly impact performance. Read the docs!
         self.detector = apt.Detector(families=self.tag_standard, nthreads=4, quad_decimate=1.0)
-        txt_camera = "USB CAMERA" if self.camera.capture_method == camera.OPENCV else "RASPBERRY PI CAMERA" 
+        txt_camera = "USB CAMERA" if self.camera.capture_method == camera.OPENCV else "RASPBERRY PI CAMERA"
         print("MiniFRC tags starting up using %s..." % txt_camera)
 
     def calibrate(self) -> bool:
@@ -91,7 +91,7 @@ class MiniTags:
             return True
 
     def get_tags(self) -> list[apt.Detection]:
-        ret, color_image = self.camera.read()
+        color_image = self.camera.read()
         if self.camera_optimizer is not None:
             color_image = cv2.undistort(color_image,
                                         self.raw_matrix,

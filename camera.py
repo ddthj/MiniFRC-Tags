@@ -28,7 +28,11 @@ class Camera:
     def read(self):
         if self.capture_method == OPENCV:
             ret, image = self.camera.read()
-            return image
+            if ret:
+                return image
+            else:
+                raise UserWarning("OpenCV could not read from a USB camera. Did you mean to use pycamera?")
+
         elif self.capture_method == PICAMERA:
             image = self.camera.capture_array()
             return image
