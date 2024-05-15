@@ -73,21 +73,22 @@ class MiniTags:
         - Great for correcting distortion in fisheye/wide-angle lenses
         - Only needs to be done once, a camera.npy file is created to store the settings
         """
-        ret, matrix, distortion = calibrate.load_camera_properties()
-        if not ret:
-            print("Running Camera Calibration to generate camera.npy... Please Read calibrate.py for more info...")
-            ret = calibrate.calibrate_camera(self.camera, self.checker_size)
-            if ret:
-                self.calibrate()
-        else:
-            self.raw_matrix = matrix
-            self.camera_matrix = (matrix[0][0], matrix[1][1], matrix[0][2], matrix[1][2])
-            self.camera_distortion = distortion
-            self.camera_optimizer, roi = cv2.getOptimalNewCameraMatrix(matrix,
-                                                                       distortion,
-                                                                       self.camera_resolution,
-                                                                       1,
-                                                                       self.camera_resolution)
+        if self.camera_matrix is None:
+            ret, matrix, distortion = calibrate.load_camera_properties()
+            if not ret:
+                print("Running Camera Calibration to generate camera.npy... Please Read calibrate.py for more info...")
+                ret = calibrate.calibrate_camera(self.camera, self.checker_size)
+                if ret:
+                    self.calibrate()
+            else:
+                self.raw_matrix = matrix
+                self.camera_matrix = (matrix[0][0], matrix[1][1], matrix[0][2], matrix[1][2])
+                self.camera_distortion = distortion
+                self.camera_optimizer, roi = cv2.getOptimalNewCameraMatrix(matrix,
+                                                                           distortion,
+                                                                           self.camera_resolution,
+                                                                           1,
+                                                                           self.camera_resolution)
             return True
 
     def get_tags(self) -> list[apt.Detection]:
