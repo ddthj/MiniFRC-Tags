@@ -51,26 +51,25 @@ def calibrate_camera(cam: camera.Camera, checker_size) -> bool:
     imgpoints = []
 
     while len(imgpoints) < 10:
-        ret, frame = cam.read()
+        frame = cam.read()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        ret, corners = cv2.findChessboardCorners(gray, checkerboard)
         if ret:
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            ret, corners = cv2.findChessboardCorners(gray, checkerboard)
-            if ret:
-                corners2d = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-                frame = cv2.drawChessboardCorners(frame, checkerboard, corners2d, ret)
-                cv2.imshow("img", frame)
-                key = cv2.waitKey(100)
-                if key == 13:
-                    objpoints.append(real3d)
-                    imgpoints.append(corners2d)
-                    print(len(imgpoints))
-                elif key == 27:
-                    break
-            else:
-                cv2.imshow("img", frame)
-                key = cv2.waitKey(20)
-                if key == 27:
-                    break
+            corners2d = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+            frame = cv2.drawChessboardCorners(frame, checkerboard, corners2d, ret)
+            cv2.imshow("img", frame)
+            key = cv2.waitKey(100)
+            if key == 13:
+                objpoints.append(real3d)
+                imgpoints.append(corners2d)
+                print(len(imgpoints))
+            elif key == 27:
+                break
+        else:
+            cv2.imshow("img", frame)
+            key = cv2.waitKey(20)
+            if key == 27:
+                break
     ret, matrix, distortion, r_vecs, t_vecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
     print("Matrix")
@@ -83,10 +82,9 @@ def calibrate_camera(cam: camera.Camera, checker_size) -> bool:
     cameramtx, roi = cv2.getOptimalNewCameraMatrix(matrix, distortion, (w, h), 1, (w, h))
 
     while True:
-        ret, frame = cam.read()
-        if ret:
-            frame = cv2.undistort(frame, matrix, distortion, None, cameramtx)
-            cv2.imshow("img", frame)
+        frame = cam.read()
+        frame = cv2.undistort(frame, matrix, distortion, None, cameramtx)
+        cv2.imshow("img", frame)
         key = cv2.waitKey(20)
         if key == 27:
             break
