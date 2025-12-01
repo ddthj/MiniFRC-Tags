@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-import camera
+from Camera import Camera
 
 
 def load_camera_properties():
@@ -20,14 +20,14 @@ def load_camera_properties():
     return False, None, None
 
 
-def calibrate_camera(cam: camera.Camera, checker_size) -> bool:
+def calibrate_camera(cam: Camera.Camera, checker_size) -> bool:
     """
     calibrate_camera creates and saves camera distortion properties to 'camera.npy'
     It will run automatically if camera.npy can't be found, but requires some setup:
 
     1. Print the pattern from https://github.com/opencv/opencv/blob/4.x/doc/pattern.png
     2. Measure the size of the checker squares. They should be 22.587mm if printed without a margin
-        -if your checker size is different, you can change CHECKER_SIZE in main.py
+        -if your checker size is different, you can change CHECKER_SIZE in MiniTags.py
     3. Place checkerboard on a well-lit flat surface and run this program. Calibration should begin automatically
     4. Move your camera around the checkerboard to capture it at various angles
     5. If the captured data looks good, press 'Enter' to save. Otherwise, press any other key to skip

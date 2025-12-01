@@ -1,61 +1,56 @@
 import cv2
 import pyapriltags as apt
+from typing import List
+
 import calibrate
-import camera
+import Camera
 
 
 class MiniTags:
     """
     The MiniTags class was designed to be fairly portable and simple to use.
-    It handles camera calibration and tag detection with the OpenCV and pyAprilTags libraries
+    It handles camera calibration, tag detection, and ESP32 communication
 
     get_tag() returns a list of tags currently in frame. You will care most about the following properties:
     tag.tag_id: int, The ID of the tag. FRC tags are numbered 1 thru 16
     center: numpy.ndarray, The center of the tag measured in pixel coordinates
     pose_R: Optional[numpy.ndarray], The orientation matrix of the tag
     pose_t: Optional[numpy.ndarray], Vector from the camera to the tag, in meters
-
-    ...For simpler/faster solutions, you may want to estimate_tag_pose = False and only use pixel coordinates
-
     """
-    def __init__(self):
-        # Camera resolution to use for calibration, distortion correction, and tag detection
-        # Higher resolution takes more processing power but is more accurate
-        # You should delete camera.npy after changing resolution to re-calibrate your camera
-        self.camera_resolution = (480, 240)
 
-        # You can set manual camera parameters if you are unhappy with the auto-calibration
-        # [focal length x in pixels, y, camera center x, y] - see AprilTags documentation
-        # self.camera_matrix = (350,350,CAMERA_RESOLUTION[0] / 2,CAMERA_RESOLUTION[1] / 2)
-        self.camera_matrix = None
+    def __init__(self,
+                 camera_type: int = Camera.PICAMERA,
+                 camera_resolution: tuple = (480, 240),
+                 camera_matrix: tuple = None,
+                 checker_size: float = 0.02261,
+                 tag_size: float = 0.0405,
+                 tag_type: str = "tag36h11",
+                 ) -> None:
+        """
+        :param camera_type: camera.PICAMERA or camera.OPENCV
+        :param camera_resolution: tuple of desired image resolution. Your camera may not support all/arbitrary resolutions. Recalibrate camera after changing resolutions
+        :param camera_matrix: tuple of camera matrix if you do not want to use auto-calibration. (focal pixels x, focal pixels y, image center x, image center y)
+        :param checker_size: the edge length of your calibration checkers in meters.
+        :param tag_size: the edge length of your tag size. 0.0405m For 1/4 scale 36h11 tags and 0.0807m For 1/2 scale 36h11 tags
+        :param tag_type: the apriltags string that identifies the tags to be used. FRC uses "tag36h11"
+        """
+
+        self.camera_resolution = camera_resolution
+        self.camera_matrix = camera_matrix
 
         # This is exclusively set by calibration code
         self.raw_matrix = None
         self.camera_distortion = None
         self.camera_optimizer = None
 
-        # The edge length of your checkerboard squares used for camera calibration
-        # Measured in meters, but not critical
-        self.checker_size = 0.02261
-
-        # The size of the apriltags in meters
-        # I recommend looking at the documentation at https://github.com/AprilRobotics/apriltag
-        self.tag_size = 0.0405  # For 1/4 scale 36h11 tags
-        # self.tag_size = 0.0807  # For 1/2 scale 36h11 tags
-
-        # What type of tags to detect
-        # refer to the pyAprilTags documentation for tag standard names
-        self.tag_standard = "tag36h11"
-
-        # set up video capture with desired resolution
-        # Use OPENCV for USB cameras and PICAMERA for the raspberry pi camera (attached via ribbon cable)
-        self.camera = camera.Camera(self.camera_resolution, camera.OPENCV)
+        self.checker_size = checker_size
+        self.tag_size = tag_size
+        self.tag_standard = tag_type
+        self.camera = Camera.Camera(self.camera_resolution, camera_type)
 
         # See https://github.com/WillB97/pyapriltags
-        # And https://github.com/WillB97/pyapriltags/blob/master/test/test.py
-        # This single line can greatly impact performance. Read the docs!
-        self.detector = apt.Detector(families=self.tag_standard, nthreads=4, quad_decimate=1.0)
-        txt_camera = "USB CAMERA" if self.camera.capture_method == camera.OPENCV else "RASPBERRY PI CAMERA"
+        self.detector = apt.Detector(families=self.tag_standard, nthreads=1, quad_decimate=1.0)
+        txt_camera = "USB CAMERA" if self.camera.capture_method == Camera.OPENCV else "RASPBERRY PI CAMERA"
         print("MiniFRC tags starting up using %s..." % txt_camera)
 
     def calibrate(self) -> bool:
@@ -91,7 +86,7 @@ class MiniTags:
                                                                            self.camera_resolution)
             return True
 
-    def get_tags(self) -> list[apt.Detection]:
+    def get_tags(self) -> List[apt.Detection]:
         color_image = self.camera.read()
         if self.camera_optimizer is not None:
             color_image = cv2.undistort(color_image,

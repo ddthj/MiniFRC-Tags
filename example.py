@@ -1,8 +1,12 @@
-from main import MiniTags
+from MiniTags import MiniTags
+from Communicator import Communicator
+
 
 # Example usage
 minitags = MiniTags()
-minitags.calibrate()  # Loads/Creates camera parameters to correct for lens distortion
+minitags.calibrate()   # Loads/Creates camera parameters to correct for lens distortion
+uart = Communicator()  # Allows data to be sent to the ESP32
+
 while True:
     # retrieve a list of tags currently in view
     tags = minitags.get_tags()
@@ -16,3 +20,8 @@ while True:
         # note that these are in a coordinate system relative to the camera, so
         # rotating the camera will still change the translation of the tag
         print("\rTag %s detected! X: %s Y: %s Z: %s" % (t.tag_id, p[0], p[1], p[2]), end="")
+
+        # Send data to the esp32
+        uart.send(str(p[0]))
+
+uart.finish()
