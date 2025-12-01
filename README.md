@@ -15,7 +15,7 @@ I have gotten away with using pip3 to install these on Linux, however on Raspber
 ## Usage
 
 - Plug in a video capture device
-- Read and modify the `__init__` code in `main.py` as desired to change parameters such as image resolution, processing threads, etc.
+- Pass optional configuration to Minitags() on instantiation 
 - On the first run, the code will only calibrate your camera. Read `calibrate.py` for details on how this works.
 - See example below to start your own solution, or run `example.py`
 
