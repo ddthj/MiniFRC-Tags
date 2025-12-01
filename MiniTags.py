@@ -97,9 +97,9 @@ class MiniTags:
         gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         if self.camera_matrix is not None:
             detections = self.detector.detect(gray_image,
-                                        estimate_tag_pose=True,
-                                        camera_params=self.camera_matrix,
-                                        tag_size=self.tag_size)
+                                              estimate_tag_pose=True,
+                                              camera_params=self.camera_matrix,
+                                              tag_size=self.tag_size)
         else:
             detections = []
             print("No camera matrix! Set manually or call calibrate() before detecting tags!")

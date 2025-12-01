@@ -20,7 +20,7 @@ def load_camera_properties():
     return False, None, None
 
 
-def calibrate_camera(cam: Camera.Camera, checker_size) -> bool:
+def calibrate_camera(cam: Camera, checker_size) -> bool:
     """
     calibrate_camera creates and saves camera distortion properties to 'camera.npy'
     It will run automatically if camera.npy can't be found, but requires some setup:

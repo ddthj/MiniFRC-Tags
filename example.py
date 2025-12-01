@@ -5,7 +5,7 @@ from Communicator import Communicator
 # Example usage
 minitags = MiniTags()
 minitags.calibrate()   # Loads/Creates camera parameters to correct for lens distortion
-uart = Communicator()  # Allows data to be sent to the ESP32
+uart = Communicator()  # Allows data to be sent to the ESP32 over UART
 
 while True:
     # retrieve a list of tags currently in view
@@ -23,5 +23,3 @@ while True:
 
         # Send data to the esp32
         uart.send(str(p[0]))
-
-uart.finish()
